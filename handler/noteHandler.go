@@ -1,6 +1,8 @@
 package handler
 
 import (
+	DTO "echo-golang/dto"
+	"echo-golang/model"
 	"echo-golang/repository"
 	"net/http"
 
@@ -23,4 +25,19 @@ func (h *noteHandler) GetNote(context echo.Context) error {
 		})
 	}
 	return context.JSON(http.StatusOK, notes)
+}
+
+func (h *noteHandler) InsertNote(context echo.Context) error {
+	note := new(DTO.NoteDTO)
+	if err := context.Bind(note); err != nil {
+		return context.JSON(http.StatusBadRequest, map[string]string{"errorBiing": "Invalid request"})
+	}
+
+	// if err := context.Validate(note); err != nil {
+	// 	return context.JSON(http.StatusBadRequest, map[string]string{"errorValidate": err.Error()})
+	// }
+
+	res, _ := h.repo.InsertNote(model.Note{Title: note.Title, Content: note.Content})
+
+	return context.JSON(http.StatusOK, res)
 }

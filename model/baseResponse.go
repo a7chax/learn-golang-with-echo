@@ -1,6 +1,7 @@
 package model
 
-type BaseResponse[data any] struct {
-	Message string `json:"message"`
-	Data    data   `json:"data"`
+type BaseResponse[T any] struct {
+	Message   string `json:"message"`
+	Data      *T     `json:"data"`
+	IsSuccess bool   `json:"isSuccess"`
 }

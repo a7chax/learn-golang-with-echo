@@ -18,6 +18,7 @@ func main() {
 
 	e := echo.New()
 	e.GET("/", noteHandler.GetNote)
+	e.POST("/insert", noteHandler.InsertNote)
 
 	if err := e.Start(":8080"); err != http.ErrServerClosed {
 		log.Fatal(err)
