@@ -1,0 +1,16 @@
+env
+domain user
+validator //https://github.com/go-playground/validator
+file naming
+unit testing semua layer
+CRUD
+middleware : basic auth, jwt  
+add layer service for bussinies logic -> services
+repositroy = db
+services = bussiness logic 
+handler = controller 
+add domain every layer at repositroy, services, handler
+handing error at handler
+handling error based on http code
+
+
