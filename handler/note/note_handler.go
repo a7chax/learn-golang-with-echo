@@ -3,7 +3,7 @@ package handler
 import (
 	DTO "echo-golang/dto"
 	"echo-golang/model"
-	"echo-golang/repository"
+	repository "echo-golang/repository/note"
 	"net/http"
 
 	"github.com/labstack/echo/v4"

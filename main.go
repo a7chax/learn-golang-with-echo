@@ -2,8 +2,9 @@ package main
 
 import (
 	"echo-golang/data/database"
-	"echo-golang/handler"
-	"echo-golang/repository"
+	handler "echo-golang/handler/note"
+	repository "echo-golang/repository/note"
+
 	"log"
 	"net/http"
 
