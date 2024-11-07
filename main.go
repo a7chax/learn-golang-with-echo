@@ -20,6 +20,9 @@ func main() {
 	e := echo.New()
 	e.GET("/", noteHandler.GetNote)
 	e.POST("/insert", noteHandler.InsertNote)
+	e.DELETE("/delete/:id", noteHandler.DeleteNoteById)
+	e.PUT("/update/:id", noteHandler.UpdateNoteById)
+	e.PUT("/update/:id", noteHandler.UpdateNoteById)
 
 	if err := e.Start(":8080"); err != http.ErrServerClosed {
 		log.Fatal(err)

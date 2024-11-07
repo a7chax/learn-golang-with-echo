@@ -46,3 +46,27 @@ func (r *noteRepository) InsertNote(note model.Note) (model.BaseResponse[model.N
 
 	return model.BaseResponse[model.Note]{Message: "Succesful insert note", Data: nil}, nil
 }
+
+func (r *noteRepository) DeleteNoteById(id int) (model.BaseResponse[model.Note], error) {
+	query := `DELETE FROM note WHERE id_notes=$1`
+	_, err := r.db.Exec(query, id)
+
+	if err != nil {
+		fmt.Println(err, "Failed to delete note")
+		return model.BaseResponse[model.Note]{Message: "Failed to delete note", Data: nil}, err
+	}
+
+	return model.BaseResponse[model.Note]{Message: "Succesful delete note", Data: nil}, nil
+}
+
+func (r *noteRepository) UpdateNoteById(id int, note model.Note) (model.BaseResponse[model.Note], error) {
+	query := `UPDATE note SET title=$1, content=$2 WHERE id_notes=$3`
+	_, err := r.db.Exec(query, note.Title, note.Content, id)
+
+	if err != nil {
+		fmt.Println(err, "Failed to update note")
+		return model.BaseResponse[model.Note]{Message: "Failed to update note", Data: nil}, err
+	}
+
+	return model.BaseResponse[model.Note]{Message: "Succesful update note", Data: nil}, nil
+}
