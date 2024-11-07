@@ -4,16 +4,34 @@ import (
 	"echo-golang/data/database"
 	handler "echo-golang/handler/note"
 	repository "echo-golang/repository/note"
+	"os"
 
 	"log"
 	"net/http"
 
+	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 )
 
-func main() {
+func ptr(s string) *string {
+	return &s
+}
 
-	db, _ := database.ConnectDatabaseNote()
+func main() {
+	err := godotenv.Load()
+
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	db, _ := database.ConnectDatabaseNote(
+		ptr(os.Getenv("DB_HOST")),
+		ptr(os.Getenv("DB_USER")),
+		ptr(os.Getenv("DB_PASSWORD")),
+		ptr(os.Getenv("DB_NAME")),
+		ptr(os.Getenv("DB_SSL_MODE")),
+	)
+
 	noteRepo := repository.NoteRepository(db)
 	noteHandler := handler.NoteHandler(noteRepo)
 

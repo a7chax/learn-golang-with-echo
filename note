@@ -1,4 +1,4 @@
-env
+env // done
 domain user
 validator //https://github.com/go-playground/validator
 file naming

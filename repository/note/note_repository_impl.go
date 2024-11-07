@@ -3,7 +3,6 @@ package repository
 import (
 	"database/sql"
 	"echo-golang/model"
-	"fmt"
 )
 
 type noteRepository struct {
@@ -11,7 +10,6 @@ type noteRepository struct {
 }
 
 func NoteRepository(db *sql.DB) INoteRepository {
-	fmt.Println("NoteRepository", &noteRepository{db})
 	return &noteRepository{db}
 }
 
@@ -20,6 +18,7 @@ func (r *noteRepository) GetNote() ([]model.Note, error) {
 	query := "SELECT * FROM note"
 	rows, err := r.db.Query(query)
 	defer r.db.Close()
+
 	if err != nil {
 		return nil, err
 	}
@@ -38,9 +37,9 @@ func (r *noteRepository) GetNote() ([]model.Note, error) {
 func (r *noteRepository) InsertNote(note model.Note) (model.BaseResponse[model.Note], error) {
 	query := `INSERT INTO note (title, content) VALUES ($1, $2)`
 	_, err := r.db.Exec(query, note.Title, note.Content)
+	defer r.db.Close()
 
 	if err != nil {
-		fmt.Println(err, "Failed to insert note")
 		return model.BaseResponse[model.Note]{Message: "Failed to insert note", Data: nil}, err
 	}
 
@@ -50,9 +49,9 @@ func (r *noteRepository) InsertNote(note model.Note) (model.BaseResponse[model.N
 func (r *noteRepository) DeleteNoteById(id int) (model.BaseResponse[model.Note], error) {
 	query := `DELETE FROM note WHERE id_notes=$1`
 	_, err := r.db.Exec(query, id)
+	defer r.db.Close()
 
 	if err != nil {
-		fmt.Println(err, "Failed to delete note")
 		return model.BaseResponse[model.Note]{Message: "Failed to delete note", Data: nil}, err
 	}
 
@@ -62,9 +61,8 @@ func (r *noteRepository) DeleteNoteById(id int) (model.BaseResponse[model.Note],
 func (r *noteRepository) UpdateNoteById(id int, note model.Note) (model.BaseResponse[model.Note], error) {
 	query := `UPDATE note SET title=$1, content=$2 WHERE id_notes=$3`
 	_, err := r.db.Exec(query, note.Title, note.Content, id)
-
+	defer r.db.Close()
 	if err != nil {
-		fmt.Println(err, "Failed to update note")
 		return model.BaseResponse[model.Note]{Message: "Failed to update note", Data: nil}, err
 	}
 
