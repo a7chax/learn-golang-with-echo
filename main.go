@@ -4,6 +4,7 @@ import (
 	"echo-golang/data/database"
 	handler "echo-golang/handler/note"
 	repository "echo-golang/repository/note"
+	service "echo-golang/service/note"
 	"os"
 
 	"log"
@@ -33,7 +34,8 @@ func main() {
 	)
 
 	noteRepo := repository.NoteRepository(db)
-	noteHandler := handler.NoteHandler(noteRepo)
+	noteService := service.NewNoteService(noteRepo)
+	noteHandler := handler.NoteHandler(noteService)
 
 	e := echo.New()
 	e.GET("/", noteHandler.GetNote)

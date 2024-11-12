@@ -17,7 +17,6 @@ func (r *noteRepository) GetNote() ([]model.Note, error) {
 	var result []model.Note
 	query := "SELECT * FROM note"
 	rows, err := r.db.Query(query)
-	defer r.db.Close()
 
 	if err != nil {
 		return nil, err

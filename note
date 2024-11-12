@@ -1,5 +1,5 @@
 env // done
-domain user
+domain user 
 validator //https://github.com/go-playground/validator
 file naming
 unit testing semua layer

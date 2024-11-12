@@ -2,7 +2,7 @@ package handler
 
 import (
 	"echo-golang/model"
-	"echo-golang/repository"
+	repository "echo-golang/repository/note"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -45,5 +45,17 @@ func TestNoteHandler_GetAllNote(t *testing.T) {
 func TestNoteHandler_InsertNote(t *testing.T) {
 	noteRepositoryMock.Mock.On("InsertNote").Return(nil, nil)
 	noteHandlerMock.InsertNote(nil)
+	noteRepositoryMock.Mock.AssertExpectations(t)
+}
+
+func TestNoteHandler_DeleteNoteById(t *testing.T) {
+	noteRepositoryMock.Mock.On("DeleteNoteById").Return(nil, nil)
+	noteHandlerMock.DeleteNoteById(nil)
+	noteRepositoryMock.Mock.AssertExpectations(t)
+}
+
+func TestNoteHandler_UpdateNoteById(t *testing.T) {
+	noteRepositoryMock.Mock.On("UpdateNoteById").Return(nil, nil)
+	noteHandlerMock.UpdateNoteById(nil)
 	noteRepositoryMock.Mock.AssertExpectations(t)
 }

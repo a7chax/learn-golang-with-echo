@@ -3,7 +3,7 @@ package handler
 import (
 	DTO "echo-golang/dto"
 	"echo-golang/model"
-	repository "echo-golang/repository/note"
+	service "echo-golang/service/note"
 	"net/http"
 	"strconv"
 
@@ -11,15 +11,15 @@ import (
 )
 
 type INoteHandler struct {
-	Repo repository.INoteRepository
+	service service.INoteService
 }
 
-func NoteHandler(repo repository.INoteRepository) *INoteHandler {
-	return &INoteHandler{repo}
+func NoteHandler(service service.INoteService) *INoteHandler {
+	return &INoteHandler{service}
 }
 
 func (h *INoteHandler) GetNote(context echo.Context) error {
-	note, err := h.Repo.GetNote()
+	note, err := h.service.GetAllNote()
 
 	if err != nil {
 		return context.JSON(http.StatusInternalServerError, map[string]string{
@@ -36,7 +36,7 @@ func (h *INoteHandler) InsertNote(context echo.Context) error {
 		return context.JSON(http.StatusBadRequest, map[string]string{"errorBiing": "Invalid request"})
 	}
 
-	res, _ := h.Repo.InsertNote(model.Note{Title: note.Title, Content: note.Content})
+	res, _ := h.service.InsertNote(model.Note{Title: note.Title, Content: note.Content})
 
 	return context.JSON(http.StatusOK, res)
 }
@@ -47,7 +47,7 @@ func (h *INoteHandler) DeleteNoteById(context echo.Context) error {
 	if err != nil {
 		return context.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid ID"})
 	}
-	res, _ := h.Repo.DeleteNoteById(idInt)
+	res, _ := h.service.DeleteNoteById(idInt)
 
 	return context.JSON(http.StatusOK, res)
 }
@@ -62,7 +62,7 @@ func (h *INoteHandler) UpdateNoteById(context echo.Context) error {
 	if err := context.Bind(note); err != nil {
 		return context.JSON(http.StatusBadRequest, map[string]string{"errorBiing": "Invalid request"})
 	}
-	res, _ := h.Repo.UpdateNoteById(idInt, model.Note{Title: note.Title, Content: note.Content})
+	res, _ := h.service.UpdateNoteById(idInt, model.Note{Title: note.Title, Content: note.Content})
 
 	return context.JSON(http.StatusOK, res)
 }
