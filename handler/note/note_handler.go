@@ -31,7 +31,6 @@ func (h *INoteHandler) GetNote(context echo.Context) error {
 
 func (h *INoteHandler) InsertNote(context echo.Context) error {
 	note := new(DTO.NoteDTO)
-	// note := DTO.NoteDTO{}
 	if err := context.Bind(note); err != nil {
 		return context.JSON(http.StatusBadRequest, map[string]string{"errorBiing": "Invalid request"})
 	}

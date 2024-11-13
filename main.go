@@ -2,9 +2,12 @@ package main
 
 import (
 	"echo-golang/data/database"
-	handler "echo-golang/handler/note"
-	repository "echo-golang/repository/note"
-	service "echo-golang/service/note"
+	user_handler "echo-golang/handler/user"
+	"echo-golang/middleware"
+	router "echo-golang/router/note"
+
+	user_repository "echo-golang/repository/user"
+	user_service "echo-golang/service/user"
 	"os"
 
 	"log"
@@ -18,6 +21,12 @@ func ptr(s string) *string {
 	return &s
 }
 
+//	func restricted(c echo.Context) error {
+//		user := c.Get("user").(*jwt.Token)
+//		claims := user.Claims.(*user_service.JwtCustomClaims)
+//		name := claims.Name
+//		return c.String(http.StatusOK, "Welcome "+name+"!")
+//	}
 func main() {
 	err := godotenv.Load()
 
@@ -33,18 +42,31 @@ func main() {
 		ptr(os.Getenv("DB_SSL_MODE")),
 	)
 
-	noteRepo := repository.NoteRepository(db)
-	noteService := service.NewNoteService(noteRepo)
-	noteHandler := handler.NoteHandler(noteService)
+	userRepo := user_repository.UserRepository(db)
+	userService := user_service.NewUserService(userRepo)
+	userHandler := user_handler.UserHandler(userService)
 
 	e := echo.New()
-	e.GET("/", noteHandler.GetNote)
-	e.POST("/insert", noteHandler.InsertNote)
-	e.DELETE("/delete/:id", noteHandler.DeleteNoteById)
-	e.PUT("/update/:id", noteHandler.UpdateNoteById)
-	e.PUT("/update/:id", noteHandler.UpdateNoteById)
+	e.Debug = true
+	// s := middleware.NewStats()
+	// e.Use(s.Process)
+	router.InitRouter(e, db)
+	// echoMiddlare := middleware.NewBasicAuth(userService)
+	// e.Use(middleware.BasicAuth(echoMiddlare))
+	// e.Use(middleware.Logger())
+	// e.Use(middleware.Recover())
 
-	if err := e.Start(":8080"); err != http.ErrServerClosed {
+	// e.Use(echojwt.WithConfig(echojwt.Config{
+	// 	SigningKey: []byte("your-secret-key"),
+	// }))
+
+	e.GET("/user", userHandler.GetAllUser)
+
+	routeLogin := e.Group("/login")
+	routeLogin.Use(middleware.BasicAuth())
+	routeLogin.POST("", userHandler.LoginUser)
+
+	if err := e.Start(":8082"); err != http.ErrServerClosed {
 		log.Fatal(err)
 	}
 }
