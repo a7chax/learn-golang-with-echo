@@ -1,8 +1,10 @@
 package repository
 
-import "echo-golang/model"
+import (
+	model_response "echo-golang/model/response"
+)
 
 type IUserRepository interface {
-	GetUser() ([]model.User, error)
-	LoginUser(username string, password string) (model.User, error)
+	GetUser() ([]model_response.User, error)
+	LoginUser(username string, password string) (model_response.User, error)
 }

@@ -2,6 +2,7 @@ package service
 
 import (
 	"echo-golang/model"
+	model_response "echo-golang/model/response"
 	repository "echo-golang/repository/user"
 	"errors"
 	"time"
@@ -10,7 +11,7 @@ import (
 )
 
 type IUserService interface {
-	GetAllUser() ([]model.User, error)
+	GetAllUser() ([]model_response.User, error)
 	LoginUser(username string, password string) (model.BaseResponse[string], error)
 }
 
@@ -28,13 +29,12 @@ func NewUserService(repo repository.IUserRepository) *UserService {
 	return &UserService{repo}
 }
 
-func (s *UserService) GetAllUser() ([]model.User, error) {
+func (s *UserService) GetAllUser() ([]model_response.User, error) {
 	return s.repo.GetUser()
 }
 
 func (s *UserService) LoginUser(username string, password string) (model.BaseResponse[string], error) {
 
-	// Validate input
 	if len(password) < 4 {
 		return model.BaseResponse[string]{
 			IsSuccess: false,
@@ -42,6 +42,7 @@ func (s *UserService) LoginUser(username string, password string) (model.BaseRes
 			Data:      nil,
 		}, errors.New("password must be at least 4 characters long")
 	}
+
 	if username == "" {
 		return model.BaseResponse[string]{
 			IsSuccess: false,

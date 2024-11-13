@@ -1,10 +1,14 @@
 package repository
 
-import "echo-golang/model"
+import (
+	"database/sql"
+	model_request "echo-golang/model/request"
+	model_response "echo-golang/model/response"
+)
 
 type INoteRepository interface {
-	GetNote() ([]model.Note, error)
-	InsertNote(note model.Note) (model.BaseResponse[model.Note], error)
-	DeleteNoteById(id int) (model.BaseResponse[model.Note], error)
-	UpdateNoteById(id int, note model.Note) (model.BaseResponse[model.Note], error)
+	GetNote() ([]model_response.Note, error)
+	InsertNote(note model_request.Note) (sql.Result, error)
+	DeleteNoteById(id int) (sql.Result, error)
+	UpdateNoteById(id int, note model_request.Note) (sql.Result, error)
 }

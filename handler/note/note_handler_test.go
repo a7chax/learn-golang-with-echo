@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"echo-golang/model"
+	model_response "echo-golang/model/response"
 	repository "echo-golang/repository/note"
 	"encoding/json"
 	"net/http"
@@ -17,7 +17,7 @@ var noteRepositoryMock = &repository.INoteRepositoryMock{Mock: mock.Mock{}}
 var noteHandlerMock = INoteHandler{noteRepositoryMock}
 
 func TestNoteHandler_GetAllNote(t *testing.T) {
-	note := []model.Note{
+	note := []model_response.Note{
 		{
 			IdNote:       1,
 			Title:        "Title 1",

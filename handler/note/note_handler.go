@@ -1,8 +1,7 @@
 package handler
 
 import (
-	DTO "echo-golang/dto"
-	"echo-golang/model"
+	model_request "echo-golang/model/request"
 	service "echo-golang/service/note"
 	"net/http"
 	"strconv"
@@ -30,12 +29,15 @@ func (h *INoteHandler) GetNote(context echo.Context) error {
 }
 
 func (h *INoteHandler) InsertNote(context echo.Context) error {
-	note := new(DTO.NoteDTO)
+	note := new(model_request.Note)
 	if err := context.Bind(note); err != nil {
 		return context.JSON(http.StatusBadRequest, map[string]string{"errorBiing": "Invalid request"})
 	}
 
-	res, _ := h.service.InsertNote(model.Note{Title: note.Title, Content: note.Content})
+	res, _ := h.service.InsertNote(model_request.Note{
+		Title:   note.Title,
+		Content: note.Content,
+	})
 
 	return context.JSON(http.StatusOK, res)
 }
@@ -57,11 +59,11 @@ func (h *INoteHandler) UpdateNoteById(context echo.Context) error {
 	if err != nil {
 		return context.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid ID"})
 	}
-	note := new(DTO.NoteDTO)
+	note := new(model_request.Note)
 	if err := context.Bind(note); err != nil {
 		return context.JSON(http.StatusBadRequest, map[string]string{"errorBiing": "Invalid request"})
 	}
-	res, _ := h.service.UpdateNoteById(idInt, model.Note{Title: note.Title, Content: note.Content})
+	res, _ := h.service.UpdateNoteById(idInt, model_request.Note{Title: note.Title, Content: note.Content})
 
 	return context.JSON(http.StatusOK, res)
 }

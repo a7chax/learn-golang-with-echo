@@ -2,7 +2,7 @@ package repository
 
 import (
 	"database/sql"
-	"echo-golang/model"
+	model_response "echo-golang/model/response"
 )
 
 type userRepository struct {
@@ -13,8 +13,8 @@ func UserRepository(db *sql.DB) IUserRepository {
 	return &userRepository{db}
 }
 
-func (r *userRepository) GetUser() ([]model.User, error) {
-	var result []model.User
+func (r *userRepository) GetUser() ([]model_response.User, error) {
+	var result []model_response.User
 	query := "SELECT * FROM note_user"
 	rows, err := r.db.Query(query)
 
@@ -24,7 +24,7 @@ func (r *userRepository) GetUser() ([]model.User, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		each := model.User{}
+		each := model_response.User{}
 		if err := rows.Scan(&each.IdUser, &each.Username, &each.Email, &each.Password); err != nil {
 			return nil, err
 		}
@@ -33,13 +33,13 @@ func (r *userRepository) GetUser() ([]model.User, error) {
 	return result, nil
 }
 
-func (r *userRepository) LoginUser(username string, password string) (model.User, error) {
-	var result model.User
+func (r *userRepository) LoginUser(username string, password string) (model_response.User, error) {
+	var result model_response.User
 	query := "SELECT * FROM note_user WHERE username = $1 AND password = $2"
 	err := r.db.QueryRow(query, username, password).Scan(&result.IdUser, &result.Username, &result.Password, &result.Email)
 
 	if err != nil {
-		return model.User{}, err
+		return model_response.User{}, err
 	}
 	return result, nil
 }

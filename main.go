@@ -21,12 +21,6 @@ func ptr(s string) *string {
 	return &s
 }
 
-//	func restricted(c echo.Context) error {
-//		user := c.Get("user").(*jwt.Token)
-//		claims := user.Claims.(*user_service.JwtCustomClaims)
-//		name := claims.Name
-//		return c.String(http.StatusOK, "Welcome "+name+"!")
-//	}
 func main() {
 	err := godotenv.Load()
 
@@ -48,23 +42,13 @@ func main() {
 
 	e := echo.New()
 	e.Debug = true
-	// s := middleware.NewStats()
-	// e.Use(s.Process)
-	router.InitRouter(e, db)
-	// echoMiddlare := middleware.NewBasicAuth(userService)
-	// e.Use(middleware.BasicAuth(echoMiddlare))
-	// e.Use(middleware.Logger())
-	// e.Use(middleware.Recover())
 
-	// e.Use(echojwt.WithConfig(echojwt.Config{
-	// 	SigningKey: []byte("your-secret-key"),
-	// }))
+	router.InitRouter(e, db)
 
 	e.GET("/user", userHandler.GetAllUser)
 
 	routeLogin := e.Group("/login")
-	routeLogin.Use(middleware.BasicAuth())
-	routeLogin.POST("", userHandler.LoginUser)
+	routeLogin.POST("", userHandler.LoginUser, middleware.BasicAuth())
 
 	if err := e.Start(":8082"); err != http.ErrServerClosed {
 		log.Fatal(err)
