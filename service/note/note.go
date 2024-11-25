@@ -5,7 +5,6 @@ import (
 	"echo-golang/model"
 	model_request "echo-golang/model/request"
 	repository "echo-golang/repository/note"
-	"fmt"
 )
 
 type INoteService interface {
@@ -46,7 +45,6 @@ func (s *NoteService) InsertNote(note model_request.Note) (model.BaseResponseNoD
 	_, err := s.repo.InsertNote(note)
 
 	if err != nil {
-		fmt.Println(err)
 		return model.BaseResponseNoData{
 			Message:   "Failed to insert note",
 			IsSuccess: false,

@@ -5,6 +5,7 @@ import (
 	model_request "echo-golang/model/request"
 	service "echo-golang/service/user"
 	"echo-golang/validators"
+	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -54,4 +55,17 @@ func (h *IUserHandler) LoginUser(context echo.Context) error {
 	}
 	return context.JSON(http.StatusOK, response)
 
+}
+
+func (h *IUserHandler) RefreshToken(context echo.Context) error {
+	token := context.Request().Header.Get("Authorization")
+	response, err := h.service.RefreshToken(token)
+	fmt.Println(response, "tokennya", err)
+	if err != nil {
+		return context.JSON(http.StatusInternalServerError, model.BaseResponseNoData{
+			IsSuccess: false,
+			Message:   err.Error(),
+		})
+	}
+	return context.JSON(http.StatusOK, response)
 }

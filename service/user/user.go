@@ -13,6 +13,7 @@ import (
 type IUserService interface {
 	GetAllUser() ([]model_response.User, error)
 	LoginUser(login model_request.Login) (model.BaseResponse[string], error)
+	RefreshToken(token string) (model.BaseResponse[string], error)
 }
 
 type JwtCustomClaims struct {
@@ -35,22 +36,6 @@ func (s *UserService) GetAllUser() ([]model_response.User, error) {
 
 func (s *UserService) LoginUser(login model_request.Login) (model.BaseResponse[string], error) {
 
-	// if len(password) < 4 {
-	// 	return model.BaseResponse[string]{
-	// 		IsSuccess: false,
-	// 		Message:   "Password must be at least 4 characters long",
-	// 		Data:      nil,
-	// 	}, errors.New("password must be at least 4 characters long")
-	// }
-
-	// if username == "" {
-	// 	return model.BaseResponse[string]{
-	// 		IsSuccess: false,
-	// 		Message:   "username cannot be empty",
-	// 		Data:      nil,
-	// 	}, errors.New("username cannot be empty")
-	// }
-
 	user, err := s.repo.LoginUser(login)
 
 	if user.Username == login.Username && user.Password == login.Password {
@@ -58,7 +43,7 @@ func (s *UserService) LoginUser(login model_request.Login) (model.BaseResponse[s
 			user.Username,
 			true,
 			jwt.RegisteredClaims{
-				ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Second * 5)),
+				ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Second * 60)),
 			},
 		}
 
@@ -77,4 +62,38 @@ func (s *UserService) LoginUser(login model_request.Login) (model.BaseResponse[s
 			Data:      nil,
 		}, err
 	}
+}
+
+func (s *UserService) RefreshToken(token string) (model.BaseResponse[string], error) {
+	claims := &JwtCustomClaims{}
+	tkn, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
+		return []byte("secret"), nil
+	})
+
+	if err != nil {
+		return model.BaseResponse[string]{
+			IsSuccess: false,
+			Message:   "Token invalid",
+			Data:      nil,
+		}, err
+	}
+
+	if !tkn.Valid {
+		return model.BaseResponse[string]{
+			IsSuccess: false,
+			Message:   "Token invalid",
+			Data:      nil,
+		}, err
+	}
+
+	claims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(time.Second * 60))
+
+	newToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	t, _ := newToken.SignedString([]byte("secret"))
+
+	return model.BaseResponse[string]{
+		IsSuccess: true,
+		Message:   "Refresh token success",
+		Data:      &t,
+	}, nil
 }
