@@ -58,7 +58,7 @@ func (s *UserService) LoginUser(login model_request.Login) (model.BaseResponse[s
 			user.Username,
 			true,
 			jwt.RegisteredClaims{
-				ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 72)),
+				ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Second * 5)),
 			},
 		}
 
