@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	model_request "echo-golang/model/request"
 	model_response "echo-golang/model/response"
 )
 
@@ -33,10 +34,10 @@ func (r *userRepository) GetUser() ([]model_response.User, error) {
 	return result, nil
 }
 
-func (r *userRepository) LoginUser(username string, password string) (model_response.User, error) {
+func (r *userRepository) LoginUser(login model_request.Login) (model_response.User, error) {
 	var result model_response.User
 	query := "SELECT * FROM note_user WHERE username = $1 AND password = $2"
-	err := r.db.QueryRow(query, username, password).Scan(&result.IdUser, &result.Username, &result.Password, &result.Email)
+	err := r.db.QueryRow(query, login.Username, login.Password).Scan(&result.IdUser, &result.Username, &result.Password, &result.Email)
 
 	if err != nil {
 		return model_response.User{}, err

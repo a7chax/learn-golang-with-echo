@@ -2,9 +2,9 @@ package service
 
 import (
 	"echo-golang/model"
+	model_request "echo-golang/model/request"
 	model_response "echo-golang/model/response"
 	repository "echo-golang/repository/user"
-	"errors"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -12,7 +12,7 @@ import (
 
 type IUserService interface {
 	GetAllUser() ([]model_response.User, error)
-	LoginUser(username string, password string) (model.BaseResponse[string], error)
+	LoginUser(login model_request.Login) (model.BaseResponse[string], error)
 }
 
 type JwtCustomClaims struct {
@@ -33,27 +33,27 @@ func (s *UserService) GetAllUser() ([]model_response.User, error) {
 	return s.repo.GetUser()
 }
 
-func (s *UserService) LoginUser(username string, password string) (model.BaseResponse[string], error) {
+func (s *UserService) LoginUser(login model_request.Login) (model.BaseResponse[string], error) {
 
-	if len(password) < 4 {
-		return model.BaseResponse[string]{
-			IsSuccess: false,
-			Message:   "Password must be at least 4 characters long",
-			Data:      nil,
-		}, errors.New("password must be at least 4 characters long")
-	}
+	// if len(password) < 4 {
+	// 	return model.BaseResponse[string]{
+	// 		IsSuccess: false,
+	// 		Message:   "Password must be at least 4 characters long",
+	// 		Data:      nil,
+	// 	}, errors.New("password must be at least 4 characters long")
+	// }
 
-	if username == "" {
-		return model.BaseResponse[string]{
-			IsSuccess: false,
-			Message:   "username cannot be empty",
-			Data:      nil,
-		}, errors.New("username cannot be empty")
-	}
+	// if username == "" {
+	// 	return model.BaseResponse[string]{
+	// 		IsSuccess: false,
+	// 		Message:   "username cannot be empty",
+	// 		Data:      nil,
+	// 	}, errors.New("username cannot be empty")
+	// }
 
-	user, err := s.repo.LoginUser(username, password)
+	user, err := s.repo.LoginUser(login)
 
-	if user.Username == username && user.Password == password {
+	if user.Username == login.Username && user.Password == login.Password {
 		claims := &JwtCustomClaims{
 			user.Username,
 			true,

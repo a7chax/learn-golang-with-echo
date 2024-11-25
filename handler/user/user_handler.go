@@ -1,7 +1,10 @@
 package handler
 
 import (
+	"echo-golang/model"
+	model_request "echo-golang/model/request"
 	service "echo-golang/service/user"
+	"echo-golang/validators"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -26,18 +29,29 @@ func (h *IUserHandler) GetAllUser(context echo.Context) error {
 	return context.JSON(http.StatusOK, user)
 }
 
-type login struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-}
-
 func (h *IUserHandler) LoginUser(context echo.Context) error {
-	username := context.FormValue("username")
-	password := context.FormValue("password")
+	var login model_request.Login
 
-	response, err := h.service.LoginUser(username, password)
+	err := context.Bind(&login)
 	if err != nil {
-		return context.JSON(http.StatusInternalServerError, response)
+		return context.JSON(http.StatusBadRequest, map[string]string{
+			"error": err.Error(),
+		})
+	}
+
+	validator := validators.New()
+
+	if err = validator.Validate(login); err != nil {
+		return context.JSON(http.StatusBadRequest, model.BaseResponseNoData{
+			IsSuccess: false,
+			Message:   err.Error(),
+		})
+	}
+
+	response, err := h.service.LoginUser(login)
+	if err != nil {
+		return context.JSON(http.StatusInternalServerError, err)
 	}
 	return context.JSON(http.StatusOK, response)
+
 }
