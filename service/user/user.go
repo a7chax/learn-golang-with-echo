@@ -5,6 +5,7 @@ import (
 	model_request "echo-golang/model/request"
 	model_response "echo-golang/model/response"
 	repository "echo-golang/repository/user"
+	"echo-golang/utils"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -14,6 +15,7 @@ type IUserService interface {
 	GetAllUser() ([]model_response.User, error)
 	LoginUser(login model_request.Login) (model.BaseResponse[string], error)
 	RefreshToken(token string) (model.BaseResponse[string], error)
+	RegisterUser(register model_request.Register) (model.BaseResponse[string], error)
 }
 
 type JwtCustomClaims struct {
@@ -38,7 +40,9 @@ func (s *UserService) LoginUser(login model_request.Login) (model.BaseResponse[s
 
 	user, err := s.repo.LoginUser(login)
 
-	if user.Username == login.Username && user.Password == login.Password {
+	decrypted := utils.DecryptPassword(login.Password, user.Password)
+
+	if user.Username == login.Username && decrypted == nil {
 		claims := &JwtCustomClaims{
 			user.Username,
 			true,
@@ -95,5 +99,35 @@ func (s *UserService) RefreshToken(token string) (model.BaseResponse[string], er
 		IsSuccess: true,
 		Message:   "Refresh token success",
 		Data:      &t,
+	}, nil
+}
+
+func (s *UserService) RegisterUser(register model_request.Register) (model.BaseResponse[string], error) {
+	encryptedPassword, err := utils.EncryptPassword(register.Password)
+
+	if err != nil {
+		return model.BaseResponse[string]{
+			IsSuccess: false,
+			Message:   "Failed to encrypt password",
+			Data:      nil,
+		}, err
+	}
+
+	register.Password = encryptedPassword
+
+	_, err = s.repo.RegisterUser(register)
+
+	if err != nil {
+		return model.BaseResponse[string]{
+			IsSuccess: false,
+			Message:   "Failed to register user",
+			Data:      nil,
+		}, err
+	}
+
+	return model.BaseResponse[string]{
+		IsSuccess: true,
+		Message:   "Register user success",
+		Data:      nil,
 	}, nil
 }

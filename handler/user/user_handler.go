@@ -69,3 +69,29 @@ func (h *IUserHandler) RefreshToken(context echo.Context) error {
 	}
 	return context.JSON(http.StatusOK, response)
 }
+
+func (h *IUserHandler) RegisterUser(context echo.Context) error {
+	var register model_request.Register
+
+	err := context.Bind(&register)
+	if err != nil {
+		return context.JSON(http.StatusBadRequest, map[string]string{
+			"error": err.Error(),
+		})
+	}
+
+	validator := validators.New()
+
+	if err = validator.Validate(register); err != nil {
+		return context.JSON(http.StatusBadRequest, model.BaseResponseNoData{
+			IsSuccess: false,
+			Message:   err.Error(),
+		})
+	}
+
+	response, err := h.service.RegisterUser(register)
+	if err != nil {
+		return context.JSON(http.StatusInternalServerError, err)
+	}
+	return context.JSON(http.StatusOK, response)
+}

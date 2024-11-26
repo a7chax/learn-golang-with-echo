@@ -36,11 +36,18 @@ func (r *userRepository) GetUser() ([]model_response.User, error) {
 
 func (r *userRepository) LoginUser(login model_request.Login) (model_response.User, error) {
 	var result model_response.User
-	query := "SELECT * FROM note_user WHERE username = $1 AND password = $2"
-	err := r.db.QueryRow(query, login.Username, login.Password).Scan(&result.IdUser, &result.Username, &result.Password, &result.Email)
+	query := "SELECT * FROM note_user WHERE username = $1"
+	err := r.db.QueryRow(query, login.Username).Scan(&result.IdUser, &result.Username, &result.Password, &result.Email)
 
 	if err != nil {
 		return model_response.User{}, err
 	}
 	return result, nil
+}
+
+func (r *userRepository) RegisterUser(register model_request.Register) (sql.Result, error) {
+	query := `INSERT INTO note_user (username, password, email) VALUES ($1, $2, $3) RETURNING user_id`
+	execResult, err := r.db.Exec(query, register.Username, register.Password, register.Email)
+
+	return execResult, err
 }

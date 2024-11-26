@@ -19,4 +19,5 @@ func InitUserRouter(e *echo.Echo, db *sql.DB) {
 	routeLogin.GET("", userHandler.GetAllUser)
 	routeLogin.POST("/login", userHandler.LoginUser, middleware.BasicAuth())
 	routeLogin.POST("/refresh", userHandler.RefreshToken, middleware.JWT)
+	routeLogin.POST("/register", userHandler.RegisterUser, middleware.BasicAuth())
 }
