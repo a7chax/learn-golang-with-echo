@@ -13,6 +13,7 @@ import (
 
 type IUserService interface {
 	GetAllUser() ([]model_response.User, error)
+	GetUser(token string) (model.BaseResponse[model_response.User], error)
 	LoginUser(login model_request.Login) (model.BaseResponse[string], error)
 	RefreshToken(token string) (model.BaseResponse[string], error)
 	RegisterUser(register model_request.Register) (model.BaseResponse[string], error)
@@ -20,6 +21,7 @@ type IUserService interface {
 
 type JwtCustomClaims struct {
 	Name  string `json:"name"`
+	Id    int    `json:"id"`
 	Admin bool   `json:"admin"`
 	jwt.RegisteredClaims
 }
@@ -33,7 +35,36 @@ func NewUserService(repo repository.IUserRepository) *UserService {
 }
 
 func (s *UserService) GetAllUser() ([]model_response.User, error) {
-	return s.repo.GetUser()
+	return s.repo.GetUsers()
+}
+
+func (s *UserService) GetUser(token string) (model.BaseResponse[model_response.User], error) {
+	claims := &JwtCustomClaims{}
+	tkn, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
+		return []byte("secret"), nil
+	})
+	if err != nil || !tkn.Valid {
+		return model.BaseResponse[model_response.User]{
+			IsSuccess: false,
+			Message:   err.Error(),
+			Data:      nil,
+		}, err
+	}
+
+	user, err := s.repo.GetUser(claims.Id)
+	if err != nil {
+		return model.BaseResponse[model_response.User]{
+			IsSuccess: false,
+			Message:   "Failed to get user",
+			Data:      nil,
+		}, err
+	}
+
+	return model.BaseResponse[model_response.User]{
+		IsSuccess: true,
+		Message:   "Get user success",
+		Data:      &user,
+	}, nil
 }
 
 func (s *UserService) LoginUser(login model_request.Login) (model.BaseResponse[string], error) {
@@ -45,9 +76,10 @@ func (s *UserService) LoginUser(login model_request.Login) (model.BaseResponse[s
 	if user.Username == login.Username && decrypted == nil {
 		claims := &JwtCustomClaims{
 			user.Username,
+			user.IdUser,
 			true,
 			jwt.RegisteredClaims{
-				ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Second * 60)),
+				ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * 60)),
 			},
 		}
 
@@ -90,7 +122,7 @@ func (s *UserService) RefreshToken(token string) (model.BaseResponse[string], er
 		}, err
 	}
 
-	claims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(time.Second * 60))
+	claims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(time.Minute * 60))
 
 	newToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	t, _ := newToken.SignedString([]byte("secret"))

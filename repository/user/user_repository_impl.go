@@ -14,7 +14,7 @@ func UserRepository(db *sql.DB) IUserRepository {
 	return &userRepository{db}
 }
 
-func (r *userRepository) GetUser() ([]model_response.User, error) {
+func (r *userRepository) GetUsers() ([]model_response.User, error) {
 	var result []model_response.User
 	query := "SELECT * FROM note_user"
 	rows, err := r.db.Query(query)
@@ -30,6 +30,17 @@ func (r *userRepository) GetUser() ([]model_response.User, error) {
 			return nil, err
 		}
 		result = append(result, each)
+	}
+	return result, nil
+}
+
+func (r *userRepository) GetUser(id int) (model_response.User, error) {
+	var result model_response.User
+	query := "SELECT * FROM note_user WHERE user_id = $1"
+	err := r.db.QueryRow(query, id).Scan(&result.IdUser, &result.Username, &result.Password, &result.Email)
+
+	if err != nil {
+		return model_response.User{}, err
 	}
 	return result, nil
 }

@@ -17,7 +17,7 @@ func InitNoteRouter(e *echo.Echo, db *sql.DB) {
 
 	routeNote := e.Group("/note")
 
-	routeNote.Use(middleware.JWT)
+	routeNote.Use(middleware.JWT())
 	routeNote.GET("", noteHandler.GetNote)
 	routeNote.POST("", noteHandler.InsertNote)
 	routeNote.DELETE("/:id", noteHandler.DeleteNoteById)

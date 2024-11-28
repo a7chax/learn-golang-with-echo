@@ -15,9 +15,11 @@ func InitUserRouter(e *echo.Echo, db *sql.DB) {
 	userService := service.NewUserService(userRepo)
 	userHandler := user_handler.UserHandler(userService)
 
-	routeLogin := e.Group("/user")
-	routeLogin.GET("", userHandler.GetAllUser)
-	routeLogin.POST("/login", userHandler.LoginUser, middleware.BasicAuth())
-	routeLogin.POST("/refresh", userHandler.RefreshToken, middleware.JWT)
-	routeLogin.POST("/register", userHandler.RegisterUser, middleware.BasicAuth())
+	routeUser := e.Group("/user")
+
+	routeUser.GET("", userHandler.GetUser, middleware.JWT())
+	routeUser.GET("/all", userHandler.GetAllUser, middleware.JWT())
+	routeUser.POST("/login", userHandler.LoginUser, middleware.BasicAuth())
+	routeUser.POST("/refresh", userHandler.RefreshToken, middleware.JWT())
+	routeUser.POST("/register", userHandler.RegisterUser, middleware.BasicAuth())
 }
