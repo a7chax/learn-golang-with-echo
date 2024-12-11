@@ -1,9 +1,10 @@
-validator //https://github.com/go-playground/validator
 unit testing semua layer 
-handing error at handler
-validator & binding
-fileupload 
 handling error based on http code
+role based access
+combine two repository use case
+pagination
+        
+
 
 //DONE
 env // done
@@ -16,6 +17,11 @@ middleware : basic auth, jwt
 CRUD //done
 file naming  //done
 repositroy = db //done
+fileupload 
+handing error at handler
+validator //https://github.com/go-playground/validator //done
+validator & binding
+
 
 
 

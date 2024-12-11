@@ -4,10 +4,12 @@ import (
 	"echo-golang/model"
 	model_request "echo-golang/model/request"
 	service "echo-golang/service/user"
+	"echo-golang/utils"
 	"echo-golang/validators"
 	"fmt"
 	"net/http"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 )
 
@@ -98,8 +100,13 @@ func (h *IUserHandler) RegisterUser(context echo.Context) error {
 
 func (h *IUserHandler) GetUser(context echo.Context) error {
 	token := context.Request().Header.Get("Authorization")
+	claims := &utils.JwtCustomClaims{}
 
-	user, err := h.service.GetUser(token)
+	jwt.ParseWithClaims(token, claims.Jwt, func(token *jwt.Token) (interface{}, error) {
+		return []byte("secret"), nil
+	})
+
+	user, err := h.service.GetUser(claims.Id)
 	if err != nil {
 		return context.JSON(http.StatusInternalServerError, model.BaseResponseNoData{
 			IsSuccess: false,

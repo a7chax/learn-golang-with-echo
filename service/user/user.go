@@ -1,29 +1,25 @@
 package service
 
 import (
+	"context"
 	"echo-golang/model"
 	model_request "echo-golang/model/request"
 	model_response "echo-golang/model/response"
 	repository "echo-golang/repository/user"
 	"echo-golang/utils"
+	"strconv"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/redis/go-redis/v9"
 )
 
 type IUserService interface {
 	GetAllUser() ([]model_response.User, error)
-	GetUser(token string) (model.BaseResponse[model_response.User], error)
+	GetUser(id int) (model.BaseResponse[model_response.User], error)
 	LoginUser(login model_request.Login) (model.BaseResponse[string], error)
 	RefreshToken(token string) (model.BaseResponse[string], error)
 	RegisterUser(register model_request.Register) (model.BaseResponse[string], error)
-}
-
-type JwtCustomClaims struct {
-	Name  string `json:"name"`
-	Id    int    `json:"id"`
-	Admin bool   `json:"admin"`
-	jwt.RegisteredClaims
 }
 
 type UserService struct {
@@ -38,24 +34,37 @@ func (s *UserService) GetAllUser() ([]model_response.User, error) {
 	return s.repo.GetUsers()
 }
 
-func (s *UserService) GetUser(token string) (model.BaseResponse[model_response.User], error) {
-	claims := &JwtCustomClaims{}
-	tkn, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
-		return []byte("secret"), nil
+func (s *UserService) GetUser(id int) (model.BaseResponse[model_response.User], error) {
+
+	rdb := redis.NewClient(&redis.Options{
+		Addr: "localhost:6379", // Redis address
 	})
-	if err != nil || !tkn.Valid {
+	ctx := context.Background()
+
+	idUser := strconv.Itoa(id)
+	cachedUser, err := rdb.Get(ctx, idUser).Result()
+	if err == nil {
 		return model.BaseResponse[model_response.User]{
-			IsSuccess: false,
-			Message:   err.Error(),
-			Data:      nil,
-		}, err
+			IsSuccess: true,
+			Message:   "Get user success",
+			Data:      &model_response.User{Username: cachedUser}, // Assuming cachedUser is a JSON string and you need to unmarshal it to User struct
+		}, nil
 	}
 
-	user, err := s.repo.GetUser(claims.Id)
+	user, err := s.repo.GetUser(id)
 	if err != nil {
 		return model.BaseResponse[model_response.User]{
 			IsSuccess: false,
 			Message:   "Failed to get user",
+			Data:      nil,
+		}, err
+	}
+
+	err = rdb.Set(ctx, idUser, "userJSON", 0).Err()
+	if err != nil {
+		return model.BaseResponse[model_response.User]{
+			IsSuccess: false,
+			Message:   "Failed to store user in Redis",
 			Data:      nil,
 		}, err
 	}
@@ -74,16 +83,16 @@ func (s *UserService) LoginUser(login model_request.Login) (model.BaseResponse[s
 	decrypted := utils.DecryptPassword(login.Password, user.Password)
 
 	if user.Username == login.Username && decrypted == nil {
-		claims := &JwtCustomClaims{
-			user.Username,
-			user.IdUser,
-			true,
-			jwt.RegisteredClaims{
+		claims := &utils.JwtCustomClaims{
+			Name:  user.Username,
+			Id:    user.IdUser,
+			Admin: true,
+			Jwt: jwt.RegisteredClaims{
 				ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * 60)),
 			},
 		}
 
-		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims.Jwt)
 		t, _ := token.SignedString([]byte("secret"))
 
 		return model.BaseResponse[string]{
@@ -101,8 +110,8 @@ func (s *UserService) LoginUser(login model_request.Login) (model.BaseResponse[s
 }
 
 func (s *UserService) RefreshToken(token string) (model.BaseResponse[string], error) {
-	claims := &JwtCustomClaims{}
-	tkn, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
+	claims := &utils.JwtCustomClaims{}
+	tkn, err := jwt.ParseWithClaims(token, claims.Jwt, func(token *jwt.Token) (interface{}, error) {
 		return []byte("secret"), nil
 	})
 
@@ -122,9 +131,9 @@ func (s *UserService) RefreshToken(token string) (model.BaseResponse[string], er
 		}, err
 	}
 
-	claims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(time.Minute * 60))
+	claims.Jwt.ExpiresAt = jwt.NewNumericDate(time.Now().Add(time.Minute * 60))
 
-	newToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	newToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims.Jwt)
 	t, _ := newToken.SignedString([]byte("secret"))
 
 	return model.BaseResponse[string]{

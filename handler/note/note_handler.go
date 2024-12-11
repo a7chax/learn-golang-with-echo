@@ -3,9 +3,12 @@ package handler
 import (
 	model_request "echo-golang/model/request"
 	service "echo-golang/service/note"
+	"echo-golang/utils"
+
 	"net/http"
 	"strconv"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 )
 
@@ -29,7 +32,16 @@ func (h *INoteHandler) GetNote(context echo.Context) error {
 }
 
 func (h *INoteHandler) InsertNote(context echo.Context) error {
+	claims := &utils.JwtCustomClaims{}
+
 	note := new(model_request.Note)
+
+	token := context.Request().Header.Get("Authorization")
+
+	jwt.ParseWithClaims(token, claims.Jwt, func(token *jwt.Token) (interface{}, error) {
+		return []byte("secret"), nil
+	})
+
 	if err := context.Bind(note); err != nil {
 		return context.JSON(http.StatusBadRequest, map[string]string{"errorBiing": "Invalid request"})
 	}
@@ -37,6 +49,7 @@ func (h *INoteHandler) InsertNote(context echo.Context) error {
 	res, _ := h.service.InsertNote(model_request.Note{
 		Title:   note.Title,
 		Content: note.Content,
+		IdUser:  claims.Id,
 	})
 
 	return context.JSON(http.StatusOK, res)

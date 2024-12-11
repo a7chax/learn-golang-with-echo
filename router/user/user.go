@@ -17,7 +17,7 @@ func InitUserRouter(e *echo.Echo, db *sql.DB) {
 
 	routeUser := e.Group("/user")
 
-	routeUser.GET("", userHandler.GetUser, middleware.JWT())
+	routeUser.GET("", userHandler.GetUser)
 	routeUser.GET("/all", userHandler.GetAllUser, middleware.JWT())
 	routeUser.POST("/login", userHandler.LoginUser, middleware.BasicAuth())
 	routeUser.POST("/refresh", userHandler.RefreshToken, middleware.JWT())

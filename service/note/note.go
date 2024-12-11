@@ -5,6 +5,8 @@ import (
 	"echo-golang/model"
 	model_request "echo-golang/model/request"
 	repository "echo-golang/repository/note"
+	user_repository "echo-golang/repository/user"
+	"fmt"
 )
 
 type INoteService interface {
@@ -16,10 +18,16 @@ type INoteService interface {
 
 type NoteService struct {
 	repo repository.INoteRepository
+	user user_repository.IUserRepository
 }
 
-func NewNoteService(repo repository.INoteRepository) *NoteService {
-	return &NoteService{repo}
+func NewNoteService(
+	repo repository.INoteRepository,
+	user user_repository.IUserRepository) *NoteService {
+	return &NoteService{
+		repo,
+		user,
+	}
 }
 
 func (s *NoteService) GetAllNote() ([]entity_note.Note, error) {
@@ -50,9 +58,18 @@ func (s *NoteService) InsertNote(note model_request.Note) (model.BaseResponseNoD
 			IsSuccess: false,
 		}, err
 	}
+	fmt.Println(note.IdUser, "idser")
+
+	response, err := s.user.GetUser(note.IdUser)
+	if err != nil {
+		return model.BaseResponseNoData{
+			Message:   "Failed to insert note1",
+			IsSuccess: false,
+		}, err
+	}
 
 	return model.BaseResponseNoData{
-		Message:   "Succesful insert note",
+		Message:   "Succesful insert note" + response.Username,
 		IsSuccess: true,
 	}, nil
 }

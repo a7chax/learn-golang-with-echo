@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"echo-golang/model"
-	service "echo-golang/service/user"
+	"echo-golang/utils"
 	"net/http"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -13,7 +13,8 @@ import (
 func JWT() echo.MiddlewareFunc {
 	config := echojwt.Config{
 		NewClaimsFunc: func(c echo.Context) jwt.Claims {
-			return new(service.JwtCustomClaims)
+			JwtClaim := &utils.JwtCustomClaims{}
+			return JwtClaim.Jwt
 		},
 		SigningKey: []byte("secret"),
 		ErrorHandler: func(c echo.Context, err error) error {
@@ -23,5 +24,6 @@ func JWT() echo.MiddlewareFunc {
 			})
 		},
 	}
+
 	return echojwt.WithConfig(config)
 }
