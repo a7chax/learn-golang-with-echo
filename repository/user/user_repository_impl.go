@@ -47,7 +47,7 @@ func (r *userRepository) GetUser(id int) (model_response.User, error) {
 
 func (r *userRepository) LoginUser(login model_request.Login) (model_response.User, error) {
 	var result model_response.User
-	query := "SELECT * FROM note_user WHERE username = $1"
+	query := "SELECT user_id, username, password, email FROM note_user WHERE username = $1"
 	err := r.db.QueryRow(query, login.Username).Scan(&result.IdUser, &result.Username, &result.Password, &result.Email)
 
 	if err != nil {
