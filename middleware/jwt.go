@@ -13,8 +13,7 @@ import (
 func JWT() echo.MiddlewareFunc {
 	config := echojwt.Config{
 		NewClaimsFunc: func(c echo.Context) jwt.Claims {
-			JwtClaim := &utils.JwtCustomClaims{}
-			return JwtClaim.Jwt
+			return new(utils.JwtCustomClaims)
 		},
 		SigningKey: []byte("secret"),
 		ErrorHandler: func(c echo.Context, err error) error {

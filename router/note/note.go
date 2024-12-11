@@ -20,6 +20,12 @@ func InitNoteRouter(e *echo.Echo, db *sql.DB) {
 
 	routeNote := e.Group("/note")
 
+	// config := echojwt.Config{
+	// 	NewClaimsFunc: func(c echo.Context) jwt.Claims {
+	// 		return new(user_service.JwtCustomClaims)
+	// 	},
+	// 	SigningKey: []byte("secret"),
+	// }
 	routeNote.Use(middleware.JWT())
 	routeNote.GET("", noteHandler.GetNote)
 	routeNote.POST("", noteHandler.InsertNote)

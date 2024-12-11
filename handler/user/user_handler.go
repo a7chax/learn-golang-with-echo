@@ -102,7 +102,7 @@ func (h *IUserHandler) GetUser(context echo.Context) error {
 	token := context.Request().Header.Get("Authorization")
 	claims := &utils.JwtCustomClaims{}
 
-	jwt.ParseWithClaims(token, claims.Jwt, func(token *jwt.Token) (interface{}, error) {
+	jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
 		return []byte("secret"), nil
 	})
 

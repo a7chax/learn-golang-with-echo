@@ -83,16 +83,9 @@ func (s *UserService) LoginUser(login model_request.Login) (model.BaseResponse[s
 	decrypted := utils.DecryptPassword(login.Password, user.Password)
 
 	if user.Username == login.Username && decrypted == nil {
-		claims := &utils.JwtCustomClaims{
-			Name:  user.Username,
-			Id:    user.IdUser,
-			Admin: true,
-			Jwt: jwt.RegisteredClaims{
-				ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * 60)),
-			},
-		}
+		claims := utils.GenerateJWT(user.Username, user.IdUser)
 
-		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims.Jwt)
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 		t, _ := token.SignedString([]byte("secret"))
 
 		return model.BaseResponse[string]{
@@ -111,7 +104,7 @@ func (s *UserService) LoginUser(login model_request.Login) (model.BaseResponse[s
 
 func (s *UserService) RefreshToken(token string) (model.BaseResponse[string], error) {
 	claims := &utils.JwtCustomClaims{}
-	tkn, err := jwt.ParseWithClaims(token, claims.Jwt, func(token *jwt.Token) (interface{}, error) {
+	tkn, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
 		return []byte("secret"), nil
 	})
 
@@ -131,9 +124,9 @@ func (s *UserService) RefreshToken(token string) (model.BaseResponse[string], er
 		}, err
 	}
 
-	claims.Jwt.ExpiresAt = jwt.NewNumericDate(time.Now().Add(time.Minute * 60))
+	claims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(time.Minute * 60))
 
-	newToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims.Jwt)
+	newToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	t, _ := newToken.SignedString([]byte("secret"))
 
 	return model.BaseResponse[string]{

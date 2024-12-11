@@ -38,7 +38,7 @@ func (h *INoteHandler) InsertNote(context echo.Context) error {
 
 	token := context.Request().Header.Get("Authorization")
 
-	jwt.ParseWithClaims(token, claims.Jwt, func(token *jwt.Token) (interface{}, error) {
+	jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
 		return []byte("secret"), nil
 	})
 
