@@ -15,7 +15,7 @@ import (
 )
 
 type IUserService interface {
-	GetAllUser() ([]model_response.User, error)
+	GetAllUser() ([]model_response.User, model.Metadata, error)
 	GetUser(id int) (model.BaseResponse[model_response.User], error)
 	LoginUser(login model_request.Login) (model.BaseResponse[string], error)
 	RefreshToken(token string) (model.BaseResponse[string], error)
@@ -30,7 +30,7 @@ func NewUserService(repo repository.IUserRepository) *UserService {
 	return &UserService{repo}
 }
 
-func (s *UserService) GetAllUser() ([]model_response.User, error) {
+func (s *UserService) GetAllUser() ([]model_response.User, model.Metadata, error) {
 	return s.repo.GetUsers()
 }
 

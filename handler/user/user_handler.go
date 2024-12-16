@@ -3,6 +3,7 @@ package handler
 import (
 	"echo-golang/model"
 	model_request "echo-golang/model/request"
+	model_response "echo-golang/model/response"
 	service "echo-golang/service/user"
 	"echo-golang/utils"
 	"echo-golang/validators"
@@ -22,14 +23,20 @@ func UserHandler(service service.IUserService) *IUserHandler {
 }
 
 func (h *IUserHandler) GetAllUser(context echo.Context) error {
-	user, err := h.service.GetAllUser()
-
+	user, metadata, err := h.service.GetAllUser()
+	fmt.Println(err, "erorrnya")
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, map[string]string{
-			"error": err.Error(),
+		return context.JSON(http.StatusInternalServerError, model.BaseResponsePaginationNoData{
+			IsSuccess: false,
+			Message:   err.Error(),
+			Metadata:  metadata,
 		})
 	}
-	return context.JSON(http.StatusOK, user)
+	return context.JSON(http.StatusOK, model.BaseResponsePagination[model_response.User]{
+		IsSuccess: true,
+		Message:   "Get all user success",
+		Data:      &user,
+	})
 }
 
 func (h *IUserHandler) LoginUser(context echo.Context) error {
