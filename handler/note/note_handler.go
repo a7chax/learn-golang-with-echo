@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"echo-golang/model"
 	model_request "echo-golang/model/request"
 	service "echo-golang/service/note"
 	"echo-golang/utils"
@@ -21,7 +22,10 @@ func NoteHandler(service service.INoteService) *INoteHandler {
 }
 
 func (h *INoteHandler) GetNote(context echo.Context) error {
-	note, err := h.service.GetAllNote()
+	note, err := h.service.GetAllNote(model.Pagination{
+		Page: 1,
+		Size: 10,
+	})
 
 	if err != nil {
 		return context.JSON(http.StatusInternalServerError, map[string]string{

@@ -10,7 +10,7 @@ import (
 )
 
 type INoteService interface {
-	GetAllNote() ([]entity_note.Note, error)
+	GetAllNote(pagination model.Pagination) ([]entity_note.Note, error)
 	InsertNote(note model_request.Note) (model.BaseResponseNoData, error)
 	DeleteNoteById(idNote int) (model.BaseResponseNoData, error)
 	UpdateNoteById(idNote int, note model_request.Note) (model.BaseResponseNoData, error)
@@ -30,8 +30,8 @@ func NewNoteService(
 	}
 }
 
-func (s *NoteService) GetAllNote() ([]entity_note.Note, error) {
-	notes, err := s.repo.GetNote()
+func (s *NoteService) GetAllNote(pagination model.Pagination) ([]entity_note.Note, error) {
+	notes, err := s.repo.GetNote(pagination)
 	if err != nil {
 		return nil, err
 	}

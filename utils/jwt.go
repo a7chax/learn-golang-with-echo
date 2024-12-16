@@ -19,7 +19,7 @@ func GenerateJWT(username string, idUser int) *JwtCustomClaims {
 		idUser,
 		true,
 		jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Second * 60)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * 60)),
 		},
 	}
 

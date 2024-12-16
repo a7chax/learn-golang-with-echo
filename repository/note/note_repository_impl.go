@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"echo-golang/model"
 	model_request "echo-golang/model/request"
 	model_response "echo-golang/model/response"
 )
@@ -14,10 +15,10 @@ func NoteRepository(db *sql.DB) INoteRepository {
 	return &noteRepository{db}
 }
 
-func (r *noteRepository) GetNote() ([]model_response.Note, error) {
+func (r *noteRepository) GetNote(pagination model.Pagination) ([]model_response.Note, error) {
 	var result []model_response.Note
-	query := "SELECT * FROM note"
-	rows, err := r.db.Query(query)
+	query := `SELECT id_notes, title, content, date_created, date_updated FROM note ORDER BY date_created ASC LIMIT $1 OFFSET $2`
+	rows, err := r.db.Query(query, pagination.Size, pagination.Page)
 
 	if err != nil {
 		return nil, err
