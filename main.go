@@ -91,6 +91,11 @@ func main() {
 	// e.Use(middleware.Recover())
 	// e.Static("/", "public")
 	// e.POST("/upload", upload)
+	// Protected route
+
+	// e.GET("/protected", func(c echo.Context) error {
+	// 	return c.String(http.StatusOK, "You have access!")
+	// }, middleware.OnlyAdmin())
 
 	router_note.InitNoteRouter(e, db)
 	router_user.InitUserRouter(e, db)

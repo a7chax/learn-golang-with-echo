@@ -9,6 +9,7 @@ import (
 	"echo-golang/validators"
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
@@ -108,9 +109,10 @@ func (h *IUserHandler) RegisterUser(context echo.Context) error {
 func (h *IUserHandler) GetUser(context echo.Context) error {
 	token := context.Request().Header.Get("Authorization")
 	claims := &utils.JwtCustomClaims{}
+	secret := os.Getenv("JWT_SECRET")
 
 	jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
-		return []byte("secret"), nil
+		return []byte(secret), nil
 	})
 
 	user, err := h.service.GetUser(claims.Id)

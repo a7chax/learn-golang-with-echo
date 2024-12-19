@@ -83,7 +83,7 @@ func (s *UserService) LoginUser(login model_request.Login) (model.BaseResponse[s
 	decrypted := utils.DecryptPassword(login.Password, user.Password)
 
 	if user.Username == login.Username && decrypted == nil {
-		claims := utils.GenerateJWT(user.Username, user.IdUser)
+		claims := utils.GenerateJWT(user)
 
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 		t, _ := token.SignedString([]byte("secret"))

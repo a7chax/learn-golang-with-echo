@@ -5,6 +5,7 @@ import (
 	model_request "echo-golang/model/request"
 	service "echo-golang/service/note"
 	"echo-golang/utils"
+	"os"
 
 	"net/http"
 	"strconv"
@@ -37,13 +38,12 @@ func (h *INoteHandler) GetNote(context echo.Context) error {
 
 func (h *INoteHandler) InsertNote(context echo.Context) error {
 	claims := &utils.JwtCustomClaims{}
-
 	note := new(model_request.Note)
-
 	token := context.Request().Header.Get("Authorization")
+	secret := os.Getenv("JWT_SECRET")
 
 	jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
-		return []byte("secret"), nil
+		return []byte(secret), nil
 	})
 
 	if err := context.Bind(note); err != nil {

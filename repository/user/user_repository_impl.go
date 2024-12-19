@@ -62,8 +62,8 @@ func (r *userRepository) GetUser(id int) (model_response.User, error) {
 
 func (r *userRepository) LoginUser(login model_request.Login) (model_response.User, error) {
 	var result model_response.User
-	query := "SELECT user_id, username, password, email FROM note_user WHERE username = $1"
-	err := r.db.QueryRow(query, login.Username).Scan(&result.IdUser, &result.Username, &result.Password, &result.Email)
+	query := "SELECT user_id, username, password, email, role FROM note_user WHERE username = $1"
+	err := r.db.QueryRow(query, login.Username).Scan(&result.IdUser, &result.Username, &result.Password, &result.Email, &result.Role)
 
 	if err != nil {
 		return model_response.User{}, err
@@ -72,8 +72,8 @@ func (r *userRepository) LoginUser(login model_request.Login) (model_response.Us
 }
 
 func (r *userRepository) RegisterUser(register model_request.Register) (sql.Result, error) {
-	query := `INSERT INTO note_user (username, password, email) VALUES ($1, $2, $3) RETURNING user_id`
-	execResult, err := r.db.Exec(query, register.Username, register.Password, register.Email)
+	query := `INSERT INTO note_user (username, password, email, role) VALUES ($1, $2, $3, $4) RETURNING user_id`
+	execResult, err := r.db.Exec(query, register.Username, register.Password, register.Email, register.Role)
 
 	return execResult, err
 }
